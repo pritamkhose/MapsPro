@@ -3,6 +3,9 @@ https://blog.logrocket.com/react-native-maps-introduction/
 https://stackoverflow.com/questions/47558468/how-to-get-current-location-using-react-native-maps
 https://www.youtube.com/watch?v=UOAr5iUO4l0&list=PLeIJUF3PiXDfOoCWgD4uibjkGQMT7a78v&index=8
 
+https://blog.logrocket.com/building-custom-maps-react-native-mapbox/
+https://stackoverflow.com/questions/64007478/cocoapods-error-installing-mapbox-ios-sdk
+
 */
 import React, {useEffect, useState} from 'react';
 import {
@@ -13,12 +16,28 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
-import MapView, {MAP_TYPES, Marker} from 'react-native-maps';
+// import MapView, {MAP_TYPES, Marker} from 'react-native-maps';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import Geolocation from '@react-native-community/geolocation';
 
+import Bubble from './Bubble';
+
+import Mapbox from '@rnmapbox/maps';
+Mapbox.setAccessToken(
+  'pk.eyJ1IjoicHJpdGFtY29nMjEiLCJhIjoiY2x2a2w5M3VoMHZlcTJ2cDcxbTQwZjBwbCJ9.DYbboFMf-MQ19b8eUDQgNw',
+);
+Mapbox.setTelemetryEnabled(false);
+
 function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
+
+  const [calloutVisible, setCalloutVisible] = useState(false);
+
+  const [coordinates] = useState([-5, 55]);
+
+  const onMarkerPress = () => {
+    setCalloutVisible(true);
+  };
 
   const [position, setPosition] = useState({
     latitude: 10,
@@ -64,7 +83,7 @@ function App(): React.JSX.Element {
           // flex: 0
         }}>
         <Text style={styles.sectionDescription}>Hi</Text>
-        <View style={styles.container}>
+        {/* <View style={styles.container}>
           <MapView
             style={styles.map}
             //specify our coordinates.
@@ -96,8 +115,36 @@ function App(): React.JSX.Element {
             description="This is a description"
             coordinate={position}
           />
-          {/* <Text style={styles.sectionDescription}>{region.latitude}</Text>
-          <Text style={styles.sectionDescription}>{region.longitude}</Text> */}
+          // <Text style={styles.sectionDescription}>{region.latitude}</Text>
+          // <Text style={styles.sectionDescription}>{region.longitude}</Text> 
+        </View>  */}
+        <View style={styles.page}>
+          <View style={styles.container}>
+            <Mapbox.MapView
+              style={styles.map}
+              styleURL={Mapbox.StyleURL.SatelliteStreet}>
+              <Mapbox.Camera
+                zoomLevel={15}
+                centerCoordinate={[position.longitude, position.latitude]}
+                animationMode="flyTo"
+                animationDuration={2000}
+              />
+
+              <Mapbox.MarkerView
+                id={'hello'}
+                coordinate={[position.longitude, position.latitude]}>
+                <View>
+                  <Text style={styles.sectionDescription}>my Location</Text>
+                </View>
+              </Mapbox.MarkerView>
+
+              {/* <Mapbox.PointAnnotation
+                id="userLocation"
+                coordinate={[position.longitude, position.latitude]}
+                title="Your location"
+              /> */}
+            </Mapbox.MapView>
+          </View>
         </View>
       </View>
     </SafeAreaView>
@@ -105,6 +152,11 @@ function App(): React.JSX.Element {
 }
 
 const styles = StyleSheet.create({
+  page: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   sectionContainer: {
     marginTop: 32,
     paddingHorizontal: 24,
@@ -122,7 +174,7 @@ const styles = StyleSheet.create({
   highlight: {
     fontWeight: '700',
   },
-  container: {
+  /* container: {
     ...StyleSheet.absoluteFillObject,
     flex: 1, //the container will fill the whole screen.
     justifyContent: 'flex-end',
@@ -131,6 +183,15 @@ const styles = StyleSheet.create({
   },
   map: {
     ...StyleSheet.absoluteFillObject,
+  }, */
+  container: {
+    ...StyleSheet.absoluteFillObject,
+    flex: 1, //the container will fill the whole screen.
+    height: 500,
+    // width: 500,
+  },
+  map: {
+    flex: 1,
   },
 });
 
