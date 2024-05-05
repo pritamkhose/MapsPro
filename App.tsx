@@ -14,8 +14,14 @@ import {
   Image,
   Dimensions,
   Button,
+  Text,
 } from 'react-native';
-import MapView, {LatLng, MAP_TYPES, Marker, Region} from 'react-native-maps';
+import MapView, {
+  PROVIDER_GOOGLE,
+  MAP_TYPES,
+  Marker,
+  Region,
+} from 'react-native-maps';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import Geolocation from '@react-native-community/geolocation';
 
@@ -36,6 +42,7 @@ function App(): React.JSX.Element {
       latitude: 41.033769,
       longitude: -73.6913,
       icon: 'y',
+      url: 'https://lh5.googleusercontent.com/p/AF1QipNfFziPZZ2cwtkfz8ujAGrVLC_obp_nxMVBFhtY=h1440',
     },
     {
       id: 2,
@@ -44,6 +51,7 @@ function App(): React.JSX.Element {
       latitude: 41.034308,
       longitude: -73.691757,
       icon: 'y',
+      url: 'https://lh5.googleusercontent.com/p/AF1QipO5IpF9Ag8S1Sk_n_dU_SUOHgfmFKCo0-2BMgFx=h1440',
     },
     {
       id: 3,
@@ -52,6 +60,7 @@ function App(): React.JSX.Element {
       latitude: 41.034681,
       longitude: -73.692277,
       icon: 'y',
+      url: 'https://lh5.googleusercontent.com/p/AF1QipNA3bbPNWHNIEQxsBuC4kWwLpcpUElKs8M50e9-=h1440',
     },
     {
       id: 7,
@@ -60,6 +69,7 @@ function App(): React.JSX.Element {
       latitude: 41.035652,
       longitude: -73.692436,
       icon: 'r',
+      url: 'https://lh5.googleusercontent.com/p/AF1QipNfFziPZZ2cwtkfz8ujAGrVLC_obp_nxMVBFhtY=h1440',
     },
     {
       id: 36,
@@ -68,6 +78,7 @@ function App(): React.JSX.Element {
       latitude: 41.035749,
       longitude: -73.692196,
       icon: 'y',
+      url: 'https://lh5.googleusercontent.com/p/AF1QipNfFziPZZ2cwtkfz8ujAGrVLC_obp_nxMVBFhtY=h1440',
     },
     {
       id: 36,
@@ -76,18 +87,40 @@ function App(): React.JSX.Element {
       latitude: 41.034993,
       longitude: -73.69346,
       icon: 'r',
+      url: 'https://lh5.googleusercontent.com/p/AF1QipPv8Ilc1-uuTPQqdnOxzp83tI-8GB3zofqobYl8=h1440',
     },
   ];
 
   const mapView = useRef<MapView>(null);
   const regionRef = useRef<Region | null>(null);
 
-  const randLatLngChange = (latLng: LatLng) => {
-    const latitude = latLng.latitude;
-    const longitude = latLng.longitude;
+  function toRad(n: number) {
+    return (n * Math.PI) / 180;
+  }
 
-    return {latitude, longitude};
-  };
+  function distance(lat1: number, lon1: number) {
+    var d = 0;
+    var lat2 = position.latitude;
+    var lon2 = position.longitude;
+
+    var R = 6371; // km
+    //has a problem with the .toRad() method below.
+    var x1 = lat2 - lat1;
+    var dLat = toRad(x1);
+    var x2 = lon2 - lon1;
+    var dLon = toRad(x2);
+    var a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) *
+        Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    d = R * c;
+    return Number.isNaN(d) ? 0 : (d * 1000).toFixed(2);
+  }
+
+  const [markerData, setMarkerData] = useState({});
 
   const [position, setPosition] = useState({
     latitude: 10,
@@ -120,8 +153,8 @@ function App(): React.JSX.Element {
   const [region, setRegion] = useState({
     latitude: 41.03505669972807,
     longitude: -73.69289022709438,
-    latitudeDelta: 0.009,
-    longitudeDelta: 0.009,
+    latitudeDelta: 0.008,
+    longitudeDelta: 0.008,
   });
 
   const backgroundStyle = {
@@ -136,24 +169,48 @@ function App(): React.JSX.Element {
       />
       <Button
         color="red"
-        title="Random Camera"
-        onPress={() =>
-          mapView.current?.animateCamera(
-            {
-              center: randLatLngChange({
-                latitude: region.latitude,
-                longitude: region.longitude,
-              }),
-            },
-            {duration: 200},
-          )
-        }
+        title="Reset"
+        onPress={() => {
+          if (mapView) {
+            setMarkerData({});
+            mapView?.current?.animateToRegion(
+              {
+                latitude: 41.03505669972807,
+                longitude: -73.69289022709438,
+                latitudeDelta: 0.009,
+                longitudeDelta: 0.009,
+              },
+              200,
+            );
+          }
+        }}
       />
+      <View>
+        <View style={{flexDirection: 'row'}}>
+          <View style={{flex: 1}}>
+            <Image
+              source={{
+                uri: markerData?.url, // 'https://avatars.githubusercontent.com/u/13750893?s=96&v=4',
+              }}
+              style={{width: 100, height: 100, backgroundColor: 'red'}}
+            />
+          </View>
+          <View style={{flex: 2}}>
+            <Text>{markerData?.title}</Text>
+            <Text>{markerData?.description}</Text>
+            <Text>
+              Distance : {distance(markerData?.latitude, markerData?.longitude)}{' '}
+              m
+            </Text>
+          </View>
+        </View>
+      </View>
       <View style={styles.container}>
         <MapView
+          // provider={PROVIDER_GOOGLE}
           style={styles.map}
           initialRegion={region}
-          mapType={MAP_TYPES.STANDARD} // SATELLITE
+          mapType={MAP_TYPES.SATELLITE_FLYOVER} // SATELLITE
           ref={mapView}
           onRegionChange={region => {
             // console.log('-->', region);
@@ -173,8 +230,13 @@ function App(): React.JSX.Element {
               <Marker
                 key={index}
                 title={data.title}
-                description={data.description}
+                // description={data.description}
                 // tracksViewChanges={false}
+                onPress={() => {
+                  if (mapView) {
+                    setMarkerData(data);
+                  }
+                }}
                 coordinate={{
                   latitude: data.latitude,
                   longitude: data.longitude,
@@ -226,7 +288,7 @@ const styles = StyleSheet.create({
   },
   container: {
     height: ScreenHeight,
-    marginTop: 30,
+    marginTop: 10,
   },
   map: {
     ...StyleSheet.absoluteFillObject,
