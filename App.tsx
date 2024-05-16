@@ -15,12 +15,16 @@ import {
   Dimensions,
   Button,
   Text,
+  Linking,
 } from 'react-native';
 import MapView, {
   PROVIDER_GOOGLE,
   MAP_TYPES,
   Marker,
   Region,
+  Polyline,
+  LocalTile,
+  UrlTile,
 } from 'react-native-maps';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import Geolocation from '@react-native-community/geolocation';
@@ -28,6 +32,9 @@ import Geolocation from '@react-native-community/geolocation';
 // const r = require('./placeholderr.png');
 // const y = require('./placeholdery.png');
 // const b = require('./placeholderb.png');
+
+const urlTemplate =
+  'file://' + 'RNFetchBlob.fs.dirs.DocumentDir' + '/maps/CZ/{z}/{x}/{y}.png';
 
 const ScreenHeight = Dimensions.get('window').height;
 
@@ -161,30 +168,74 @@ function App(): React.JSX.Element {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
+  async function takeSnapshot() {
+    const snapshot = await mapView.current?.takeSnapshot({
+      width: 300, // optional, when omitted the view-width is used
+      height: 300, // optional, when omitted the view-height is used
+      // region: {..},    // iOS only, optional region to render
+      format: 'png', // image formats: 'png', 'jpg' (default: 'png')
+      quality: 0.8, // image quality: 0..1 (only relevant for jpg, default: 1)
+      result: 'file', // result types: 'file', 'base64' (default: 'file')
+    });
+    console.log('snapshot -->', snapshot);
+
+    console.log(
+      'Map Boundaries -->',
+      await mapView.current?.getMapBoundaries(),
+    );
+  }
+
   return (
     <SafeAreaView style={backgroundStyle}>
       <StatusBar
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
         backgroundColor={backgroundStyle.backgroundColor}
       />
-      <Button
-        color="red"
-        title="Reset"
-        onPress={() => {
-          if (mapView) {
-            setMarkerData({});
-            mapView?.current?.animateToRegion(
-              {
-                latitude: 41.03505669972807,
-                longitude: -73.69289022709438,
-                latitudeDelta: 0.009,
-                longitudeDelta: 0.009,
-              },
-              200,
-            );
-          }
-        }}
-      />
+      <View style={{flexDirection: 'row'}}>
+        <Button
+          color="red"
+          title="Reset"
+          onPress={() => {
+            if (mapView) {
+              setMarkerData({});
+              mapView?.current?.animateToRegion(
+                {
+                  latitude: 41.03505669972807,
+                  longitude: -73.69289022709438,
+                  latitudeDelta: 0.009,
+                  longitudeDelta: 0.009,
+                },
+                200,
+              );
+            }
+          }}
+        />
+        <Button
+          color="blue"
+          title="Google map"
+          onPress={() => {
+            const url = `https://www.google.com/maps/dir/${position.latitude},${position.longitude}/${markerData.latitude},${markerData.latitude}/@${position.latitude},${position.longitude},17z/data=!4m2!4m1!3e0?entry=ttu`;
+            console.log('GoogleMap-->', url);
+            Linking.openURL(url);
+          }}
+        />
+        <Button
+          color="green"
+          title="Apple Map"
+          onPress={() => {
+            const url = `https://maps.apple.com/?daddr=${position.latitude},${position.longitude}&dirflg=w&saddr=${locArr[0].latitude},${locArr[0].longitude}&t=h`;
+            console.log('AppleMap-->', url);
+            Linking.openURL(url);
+          }}
+        />
+      </View>
+      <View style={{flexDirection: 'row'}}>
+        <Button
+          color="red"
+          title="takeSnapshot"
+          onPress={() => takeSnapshot()}
+        />
+      </View>
       <View>
         <View style={{flexDirection: 'row'}}>
           <View style={{flex: 1}}>
@@ -216,6 +267,8 @@ function App(): React.JSX.Element {
             // console.log('-->', region);
             setRegion(region);
           }}
+          loadingIndicatorColor="#666666"
+          loadingBackgroundColor="#eeeeee"
           onRegionChangeComplete={region => (regionRef.current = region)}
           showsUserLocation={true}
           showsMyLocationButton={true}
@@ -229,11 +282,21 @@ function App(): React.JSX.Element {
             return (
               <Marker
                 key={index}
+                identifier={`id${index}`}
                 title={data.title}
                 // description={data.description}
                 // tracksViewChanges={false}
                 onPress={() => {
                   if (mapView) {
+                    mapView?.current?.animateToRegion(
+                      {
+                        latitude: data.latitude,
+                        longitude: data.longitude,
+                        latitudeDelta: 0.009,
+                        longitudeDelta: 0.009,
+                      },
+                      200,
+                    );
                     setMarkerData(data);
                   }
                 }}
@@ -241,26 +304,31 @@ function App(): React.JSX.Element {
                   latitude: data.latitude,
                   longitude: data.longitude,
                 }}>
-                <Image
-                  key={index}
-                  source={require('./placeholdery.png')}
-                  // source={data.icon === 'r' ? r : y}
-                  // source={require(`${data.icon}`)}
-                  // source={require(data.id === 7
-                  //   ? './placeholderr.png'
-                  //   : './placeholdery.png')}
-                  style={styles.icon}
-                />
+                {data.icon === 'r' ? (
+                  <Image
+                    key={index}
+                    source={require('./placeholderyr.png')}
+                    style={styles.icon}
+                  />
+                ) : (
+                  <Image
+                    key={index}
+                    source={require('./placeholdery.png')}
+                    style={styles.icon}
+                  />
+                )}
               </Marker>
             );
           })}
+          <Polyline
+            coordinates={locArr}
+            strokeColor="#000"
+            strokeColors={['yellow']}
+            strokeWidth={6}
+          />
+          <LocalTile pathTemplate={urlTemplate} tileSize={256} />
+          {/* <UrlTile urlTemplate={urlTemplate} zIndex={1} /> */}
         </MapView>
-        {/* <Marker
-          // icon={require('./placeholder.png')}
-          title="Yor are here"
-          description="This is a description"
-          coordinate={position}
-        /> */}
         {/* <Text style={styles.sectionDescription}>{region.latitude}</Text>
           <Text style={styles.sectionDescription}>{region.longitude}</Text> */}
       </View>
