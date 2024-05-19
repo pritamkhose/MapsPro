@@ -77,3 +77,13 @@ To learn more about React Native, take a look at the following resources:
 - [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
 - [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
 - [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+
+# Links
+
+- [Cocoapods - Error installing Mapbox-iOS-SDK](https://stackoverflow.com/questions/64007478/cocoapods-error-installing-mapbox-ios-sdk)
+- [Mapbox account](https://account.mapbox.com/)
+- [Directions API Playground](https://docs.mapbox.com/playground/directions/?coordinates=-73.694235%2C41.035567&coordinates=-73.694219%2C41.032891&profile=walking&geometries=polyline6&annotations=distance%2Cduration)
+- [Networking](https://reactnative.dev/docs/network)
+- [Directions API Playground](https://docs.mapbox.com/playground/directions/?profile=walking&annotations=distance%2Cduration)
+- [OfflineManager](https://github.com/rnmapbox/maps/blob/main/docs/OfflineManager.md)
+- [Display offline pack on mapview](https://stackoverflow.com/questions/71394222/react-native-mapboxgl-how-to-display-offline-pack-on-mapview)
