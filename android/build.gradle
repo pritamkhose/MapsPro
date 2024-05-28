@@ -6,23 +6,24 @@ buildscript {
         targetSdkVersion = 34
         ndkVersion = "26.1.10909125"
         kotlinVersion = "1.9.22"
+        RNMapboxMapsVersion = '11.0.0'
     }
     repositories {
         google()
         mavenCentral()
         maven { url "https://oss.sonatype.org/content/groups/public/" }
         maven { url 'https://jitpack.io' }
-        maven {
-            url = uri("https://api.mapbox.com/downloads/v2/releases/maven")
-            credentials {
-                username = "mapbox"
-                password = "sk.eyJ1IjoicHJpdGFtY29nMjEiLCJhIjoiY2x2a3QwOHEzMG5yODJrcHBjNXpmamM1aCJ9.GJYXuQ-Na_HY_G3VGoy9Pg"
-            }
-//            authentication {
-//                create<BasicAuthentication>("basic")
-                basic(BasicAuthentication)
-            }
-        /* maven {
+    }
+    dependencies {
+        classpath("com.android.tools.build:gradle")
+        classpath("com.facebook.react:react-native-gradle-plugin")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
+    }
+}
+
+allprojects {
+    repositories {
+                maven {
             url 'https://api.mapbox.com/downloads/v2/releases/maven'
             authentication {
                 basic(BasicAuthentication)
@@ -32,15 +33,9 @@ buildscript {
                 // This should always be `mapbox` (not your username).
                 username = 'mapbox'
                 // Use the secret token you stored in gradle.properties as the password
-                // password = project.properties['MAPBOX_DOWNLOADS_TOKEN'] ?: ""
-                password = 'sk.eyJ1IjoicHJpdGFtY29nMjEiLCJhIjoiY2x2a3QwOHEzMG5yODJrcHBjNXpmamM1aCJ9.GJYXuQ-Na_HY_G3VGoy9Pg'
+                password = "sk.eyJ1IjoicHJpdGFtY29nMjEiLCJhIjoiY2x3cDZucWRlMWQyZzJpcWV5YTl6N2dybCJ9.TxhNHzDMyWPw30OI9rUBFw"
             }
-        } */
-    }
-    dependencies {
-        classpath("com.android.tools.build:gradle")
-        classpath("com.facebook.react:react-native-gradle-plugin")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
+        }
     }
 }
 
